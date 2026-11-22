@@ -160,3 +160,210 @@ Display the results you need
 
 """
 
+pp.runpp(net)
+
+# --- Question 1.1 ---
+
+U6 = net.res_bus.at[N6, "vm_pu"]
+theta6 = net.res_bus.at[N6, "va_degree"]
+U9 = net.res_bus.at[N9, "vm_pu"]
+theta9 = net.res_bus.at[N9, "va_degree"]
+
+omega = 2 * np.pi * net.f_hz
+
+idx_line = net.line.index[net.line.name == "'N6N9"][0]
+idx_bus = net.bus.index[net.bus.name == "N6"][0]
+
+R = net.line.at[idx_line, "r_ohm_per_km"]
+X = net.line.at[idx_line, "x_ohm_per_km"]
+Z = R+1j*X
+Z_B = net.bus.at[idx_bus, "vn_kv"]**2/net.sn_mva
+Z_pu = Z/Z_B
+
+Y = 1j*omega*net.line.at[idx_line, "c_nf_per_km"]*10**-9
+Y_pu = Y*Z_B
+
+I6 = net.res_line.at[idx_line, "i_from_ka"]
+I_B = net.sn_mva/(np.sqrt(3)*net.bus.at[N6, "vn_kv"])
+I6_pu = I6/I_B
+
+P_line_6 = net.res_line.at[idx_line, "p_from_mw"]
+Q_line_6 = net.res_line.at[idx_line, "q_from_mvar"]
+
+# print("=== Question 1.1 ===")
+
+# print("--- Données ---")
+# print(f"U6 = {U6:.5f} pu ∠ {theta6:.4f}°")
+# print(f"U9 = {U9:.5f} pu ∠ {theta9:.4f}°")
+
+# print("--- Vérification ---")
+# print(f"Z = {Z} Ω")
+# print(f"Z_pu = {Z_pu:.6f} pu")
+# print(f"Y = {Y} S")
+# print(f"Y_pu = {Y_pu} pu")
+# print(f"|I6| = {I6:.3f} kA")
+# print(f"|I6| = {I6_pu:.3f} pu")
+
+# print("--- Réponse ---")
+# print(f"P6 = {P_line_6:.3f} MW")
+# print(f"Q6 = {Q_line_6:.3f} MVAr")
+
+# print("\n")
+
+# --- Question 1.2 ---
+
+P_line_9 = net.res_line.at[idx_line, "p_to_mw"]
+Q_line_9 = net.res_line.at[idx_line, "q_to_mvar"]
+
+I9 = net.res_line.at[idx_line, "i_to_ka"]
+I9_pu = I9/I_B
+
+P_balance = net.res_trafo.at[idx_line, "pl_mw"]
+Q_balance = net.res_trafo.at[idx_line, "ql_mvar"]
+
+# print("=== Question 1.2 ===")
+
+# print("--- Vérification ---")
+# print(f"|I9| = {I9:.3f} kA")
+# print(f"|I9| = {I9_pu:.3f} pu")
+# print(f"P9 = {P_line_9:.3f} MW")
+# print(f"Q9 = {Q_line_9:.3f} MVAr")
+
+# print("--- Réponse ---")
+# print(f"P_balance = {P_line_6 + P_line_9:.3f} MW")
+# print(f"Q_balance = {Q_line_6 + Q_line_9:.3f} MVar")
+
+# print("\n")
+
+# --- Question 1.3 ---
+
+Z = net.line.at[idx_line, "r_ohm_per_km"] + 1j * net.line.at[idx_line, "x_ohm_per_km"]
+Y = 1j * omega * net.line.at[idx_line, "c_nf_per_km"] * 1e-9  
+
+Zc = np.sqrt(Z/Y)
+
+# print("=== Question 1.3 ===")
+
+# print("--- Réponse ---")
+# print(f"|Zc| = {abs(Zc):.3f} Ω")
+# print(f"Phase de Zc = {np.degrees(np.angle(Zc)):.3f} °")
+
+# print("\n")
+
+# --- Question 1.4 ---
+
+I_max = net.line.at[idx_line, "max_i_ka"]
+
+loading = net.res_line.at[idx_line, "loading_percent"]
+
+# print("=== Question 1.4 ===")
+
+# print("--- Données ---")
+# print(f"|I_max| = {I_max:.3f} kA")
+
+# print("--- Réponse ---")
+# print(f"Loading = {loading:.3f} %")
+
+# print("\n")
+
+# --- Question 1.5 --- 
+
+idx = net.trafo.index[net.trafo.name == "N5N106"][0]
+
+U_B5 = net.trafo.at[idx, "vn_hv_kv"]
+U_B106 = net.trafo.at[idx, "vn_lv_kv"]
+S_B = net.trafo.at[idx, "sn_mva"]
+
+U5 = net.res_trafo.at[idx, "vm_hv_pu"]
+theta5 = net.res_trafo.at[idx, "va_hv_degree"]
+U106 = net.res_trafo.at[idx, "vm_lv_pu"]
+theta106 = net.res_trafo.at[idx, "va_lv_degree"]
+
+vk = net.trafo.at[idx, "vk_percent"]
+vkr = net.trafo.at[idx, "vkr_percent"]
+
+n_tap = 1+ (net.trafo.at[idx, "tap_pos"] + net.trafo.at[idx, "tap_neutral"]) * (net.trafo.at[idx, "tap_step_percent"]/100)
+
+I5 = net.res_trafo.at[idx, "i_hv_ka"]
+I_B = S_B/(np.sqrt(3)*U_B5)
+I5_pu = I5/I_B
+
+P_transfo_5 = net.res_trafo.at[idx, "p_hv_mw"]
+Q_transfo_5 = net.res_trafo.at[idx, "q_hv_mvar"]
+
+# print("=== Question 1.5 ===")
+
+# print("--- Données ---")
+# print(f"U_B5 =  {U_B5:.3f} kV")
+# print(f"U_B106 =  {U_B106:.3f} kV")
+# print(f"S_B =  {S_B:.3f} MVA")
+# print(f"U5 = {U5:.5f} pu ∠ {theta5:.4f}°")
+# print(f"U106 = {U106:.5f} pu ∠ {theta106:.4f}°")
+# print(f"vk =  {vk:.3f} %")
+# print(f"vkr =  {vkr:.3f} %")
+# print(f"n_tap =  {n_tap:.3f}")
+
+# print("--- Vérification ---")
+# print(f"|I5| = {I5:.3f} kA")
+# print(f"|I5| = {I5_pu:.3f} pu")
+
+# print("--- Réponse ---")
+# print(f"P5 = {P_transfo_5:.3f} MW")
+# print(f"Q5 = {Q_transfo_5:.3f} MVAr")
+
+# print("\n")
+
+P_transfo_106 = net.res_trafo.at[idx, "p_lv_mw"]
+Q_transfo_106 = net.res_trafo.at[idx, "q_lv_mvar"]
+
+
+P_balance = net.res_trafo.at[idx, "pl_mw"]
+Q_balance = net.res_trafo.at[idx, "ql_mvar"]
+
+# print("=== Question 1.6 ===")
+
+# print("--- Vérification ---")
+# print(f"P106 = {P_transfo_106:.3f} MW")
+# print(f"Q106 = {Q_transfo_106:.3f} MVAr")
+
+# print("--- Réponse ---")
+# print(f"P_balance = {P_balance:.3f} MW")
+# print(f"Q_balance = {Q_balance:.3f} MVAr")
+
+# print("\n")
+
+loading = net.res_trafo.at[idx, "loading_percent"]
+
+# print("=== Question 1.7 ===")
+
+# print("--- Réponse ---")
+# print(f"Loading = {loading:.3f} %")
+
+# print("\n")
+
+idx_load  = net.load.index[net.load.bus == N207][0]
+idx_shunt = net.shunt.index[net.shunt.bus == N207][0]
+
+U207 = net.res_bus.at[N207, "vm_pu"]
+theta207 = net.res_bus.at[N207, "va_degree"]
+
+P_load = net.load.at[idx_load, "p_mw"]
+Q_load = net.load.at[idx_load, "q_mvar"]
+
+Q_shunt = net.shunt.at[idx_shunt, "q_mvar"]
+
+cos_phi_without = P_load/np.sqrt(P_load**2+Q_load**2)
+cos_phi_with = P_load/np.sqrt(P_load**2+(Q_load+Q_shunt)**2)
+
+print("=== Question 1.8 ===")
+
+print("--- Données ---")
+print(f"P_load = {P_load:.3f} MW")
+print(f"Q_load = {Q_load:.3f} MVAr")
+print(f"Q_shunt = {Q_shunt:.3f} MVAr")
+
+print("--- Réponse ---")
+print(f"cos φ without = {cos_phi_without:.3f}")
+print(f"cos φ with = {cos_phi_with:.3f}")
+
+# print("\n")

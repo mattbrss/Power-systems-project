@@ -150,5 +150,5 @@ ct.controller.trafo.DiscreteTapControl.DiscreteTapControl(net,18, 1.01,1.021, or
 
 
 # plots of system
-#pf_res_plotly(net, aspectratio=(1,1))
-#simple_plotly(net)
+pf_res_plotly(net, aspectratio=(1,1))
+simple_plotly(net)
