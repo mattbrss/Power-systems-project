@@ -10,7 +10,9 @@ net = pp.create_empty_network(f_hz=50, sn_mva=100)
     
 vmin = 0.95
 vmax = 1.1
-load_max = 100.
+load_max = 100. 
+load_increase_act = 100 # [MW]
+load_increase_react = 50 # [MAVr]
 
     
 # list of Buses
@@ -58,7 +60,7 @@ LOAD_N8 = pp.create_load(net, bus=N8, p_mw=230.0, q_mvar=75.0, name="N8", in_ser
 LOAD_N9 = pp.create_load(net, bus=N9, p_mw=220.0, q_mvar=70.0, name="N9", in_service=True, max_p_mw=220., min_p_mw=220., max_q_mvar=70., min_q_mvar=70., controllable = True)
 LOAD_N13 = pp.create_load(net, bus=N13, p_mw=300.0, q_mvar=75.0, name="N13", in_service=True, max_p_mw=300., min_p_mw=300., max_q_mvar=75., min_q_mvar=75., controllable = True)
 LOAD_N203 = pp.create_load(net, bus=N203, p_mw=360.0, q_mvar=180.0, name="N203", in_service=True, max_p_mw=540., min_p_mw=360., max_q_mvar=180., min_q_mvar=180., controllable = True)
-LOAD_N206 = pp.create_load(net, bus=N206, p_mw=360.0, q_mvar=180.0, name="N206", in_service=True, max_p_mw=360., min_p_mw=360., max_q_mvar=180., min_q_mvar=180., controllable = True)
+LOAD_N206 = pp.create_load(net, bus=N206, p_mw=360.0 + load_increase_act, q_mvar=180.0 + load_increase_react, name="N206", in_service=True, max_p_mw=360. + load_increase_act, min_p_mw=360. + load_increase_act, max_q_mvar=180. + load_increase_react, min_q_mvar=180. + load_increase_react, controllable = True)
 LOAD_N202 = pp.create_load(net, bus=N202, p_mw=360.0, q_mvar=180.0, name="N202", in_service=True, max_p_mw=360., min_p_mw=360., max_q_mvar=180., min_q_mvar=180., controllable = True)
 LOAD_N205 = pp.create_load(net, bus=N205, p_mw=360.0, q_mvar=180.0, name="N205", in_service=True, max_p_mw=360., min_p_mw=360., max_q_mvar=180., min_q_mvar=180., controllable = True)
 LOAD_N201 = pp.create_load(net, bus=N201, p_mw=360.0, q_mvar=180.0, name="N201", in_service=True, max_p_mw=360., min_p_mw=360., max_q_mvar=180., min_q_mvar=180., controllable = True)
@@ -148,3 +150,7 @@ ct.controller.trafo.DiscreteTapControl.DiscreteTapControl(net,16, 1.01,1.021, or
 ct.controller.trafo.DiscreteTapControl.DiscreteTapControl(net,17, 1.01,1.021, order = 0)
 ct.controller.trafo.DiscreteTapControl.DiscreteTapControl(net,18, 1.01,1.021, order = 0)
 
+# Source : N14, Load : N206 
+pp.runpp(net)
+pf_res_plotly(net, aspectratio=(1,1))
+simple_plotly(net)
