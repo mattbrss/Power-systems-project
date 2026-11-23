@@ -114,7 +114,9 @@ pp.create_transformer_from_parameters(net, hv_bus=N3, lv_bus=N101, sn_mva=550.0,
 pp.create_transformer_from_parameters(net, hv_bus=N7, lv_bus=N105, sn_mva=550.0, name='N7N105', shift_degree=0.0, vn_hv_kv=380.0, vn_lv_kv=150.0, vkr_percent=0.26, vk_percent=22.621494203522456, pfe_kw=0, i0_percent=0.0, tap_min=-20, tap_max=20, tap_step_percent=1, tap_pos=7,tap_neutral=0, tap_side="hv", in_service=True,max_loading_percent = load_max,tap_changer_type="Ratio")
 pp.create_transformer_from_parameters(net, hv_bus=N4, lv_bus=N102, sn_mva=550.0, name='N4N102', shift_degree=0.0, vn_hv_kv=380.0, vn_lv_kv=150.0, vkr_percent=0.416, vk_percent=24.542525888750735, pfe_kw=0, i0_percent=0.0, tap_min=-20, tap_max=20, tap_step_percent=1, tap_pos=14,tap_neutral=0, tap_side="hv", in_service=True,max_loading_percent = load_max,tap_changer_type="Ratio")
 pp.create_transformer_from_parameters(net, hv_bus=N5, lv_bus=N106, sn_mva=550.0, name='N5N106', shift_degree=0.0, vn_hv_kv=380.0, vn_lv_kv=150.0, vkr_percent=0.151, vk_percent=11.596983099065032, pfe_kw=0, i0_percent=0.0, tap_min=-20, tap_max=20, tap_step_percent=1, tap_pos=6,tap_neutral=0, tap_side="hv", in_service=True,max_loading_percent = load_max,tap_changer_type="Ratio")
-pp.create_transformer_from_parameters(net, hv_bus=N6, lv_bus=N104, sn_mva=550.0, name='N6N104', shift_degree=0.0, vn_hv_kv=380.0, vn_lv_kv=150.0, vkr_percent=0.146, vk_percent=11.440931605424446, pfe_kw=0, i0_percent=0.0, tap_min=-20, tap_max=20, tap_step_percent=1, tap_pos=2,tap_neutral=0, tap_side="hv", in_service=True,max_loading_percent = load_max,tap_changer_type="Ratio")
+
+pp.create_transformer_from_parameters(net, hv_bus=N6, lv_bus=N104, sn_mva=550.0, name='N6N104', shift_degree=330.0, vn_hv_kv=380.0, vn_lv_kv=150.0, vkr_percent=0.146, vk_percent=11.440931605424446, pfe_kw=0, i0_percent=0.0, tap_min=-20, tap_max=20, tap_step_percent=1, tap_pos=2,tap_neutral=0, tap_side="hv", in_service=True,max_loading_percent = load_max,tap_changer_type="Ratio")
+
 pp.create_transformer_from_parameters(net, hv_bus=N1, lv_bus=M1, sn_mva=1000.0, name='M1N1', shift_degree=0.0, vn_hv_kv=380.0, vn_lv_kv=20.0, vkr_percent=0.23, vk_percent=10.702471677140752, pfe_kw=0, i0_percent=0.0, tap_min=-20, tap_max=20, tap_step_percent=1, tap_pos=8,tap_neutral=0, tap_side="hv", in_service=True,max_loading_percent = load_max,tap_changer_type="Ratio")
 pp.create_transformer_from_parameters(net, hv_bus=N1, lv_bus=M2, sn_mva=1000.0, name='M2N1', shift_degree=0.0, vn_hv_kv=380.0, vn_lv_kv=20.0, vkr_percent=0.117, vk_percent=9.854694566550501, pfe_kw=0, i0_percent=0.0, tap_min=-20, tap_max=20, tap_step_percent=1, tap_pos=6,tap_neutral=0, tap_side="hv", in_service=True,max_loading_percent = load_max,tap_changer_type="Ratio")
 pp.create_transformer_from_parameters(net, hv_bus=N10, lv_bus=M6, sn_mva=1000.0, name='M6N10', shift_degree=0.0, vn_hv_kv=380.0, vn_lv_kv=20.0, vkr_percent=0.25, vk_percent=13.002403623945844, pfe_kw=0, i0_percent=0.0, tap_min=-20, tap_max=20, tap_step_percent=1, tap_pos=10,tap_neutral=0, tap_side="hv", in_service=True,max_loading_percent = load_max,tap_changer_type="Ratio")
@@ -159,3 +161,21 @@ Launch the Power Flow routine here
 Display the results you need
 
 """
+
+import pandas as pd
+kw = dict(run_control=True, calculate_voltage_angles=True, init="dc", max_iteration=50)
+
+rows = []
+for ang in [0, 5, 10, 15, 20, 25, 30, 330]:   # 330 = Yd11
+    net.trafo.loc[5, "shift_degree"] = ang
+    try:
+        pp.runpp(net, **kw)
+        rows.append(dict(shift=ang,
+                         P_T5=net.res_trafo.at[5, "p_hv_mw"],
+                         Q_T5=net.res_trafo.at[5, "q_hv_mvar"],
+                         load_T5=net.res_trafo.at[5, "loading_percent"],
+                         load_T2=net.res_trafo.at[2, "loading_percent"],
+                         Vmin=net.res_bus.vm_pu.min()))
+    except pp.LoadflowNotConverged:
+        rows.append(dict(shift=ang, P_T5="no conv."))
+print(pd.DataFrame(rows))
